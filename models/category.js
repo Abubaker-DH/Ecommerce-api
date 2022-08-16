@@ -9,6 +9,11 @@ const categorySchema = new mongoose.Schema(
       minlength: 3,
       maxlength: 10,
     },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
   { timestamps: true }
 );
