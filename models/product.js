@@ -40,14 +40,13 @@ const productSchema = new Schema(
     ],
     description: { type: String, required: true },
     price: { type: Number, required: true },
-    rating: { type: Number },
     numberInStock: {
       type: Number,
       required: true,
       min: 0,
       max: 255,
     },
-    user: {
+    userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -56,7 +55,7 @@ const productSchema = new Schema(
   { timestamps: true }
 );
 
-// NOTE: when delete product remove it from all users cart
+// INFO: When delete product remove it from all users cart
 productSchema.pre("remove", function (next) {
   userSchema.remove({ cartItems: [{ productId: this._id }] }).exec();
   next();
@@ -67,7 +66,6 @@ function validateProduct(product) {
     title: Joi.string().min(3).max(50).required(),
     price: Joi.number().required(),
     description: Joi.string().min(5).max(50).required(),
-    user: Joi.objectId().required(),
     brand: Joi.objectId().required(),
     category: Joi.objectId().required(),
     images: Joi.array()
