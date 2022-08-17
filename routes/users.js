@@ -1,3 +1,4 @@
+const fs = require("fs");
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
@@ -13,6 +14,8 @@ const {
 } = require("../models/user");
 const auth = require("../middleware/auth");
 const admin = require("../middleware/admin");
+const validateObjectId = require("../middleware/validateObjectId");
+const { upload } = require("../middleware/upload");
 const { Product } = require("../models/product");
 const router = express.Router();
 
@@ -33,7 +36,7 @@ router.get("/cart", auth, async (req, res) => {
 });
 
 // INFO: Get one user by ID
-router.get("/:id", [auth, admin], async (req, res) => {
+router.get("/:id", [auth, admin, validateObjectId], async (req, res) => {
   const user = await User.findById(req.params.id);
   if (!user)
     return res.status(404).send("The user with given ID was not found.");
@@ -84,37 +87,65 @@ router.post("/login", async (req, res, next) => {
   res.send(token);
 });
 
-// INFO: update user route
-router.put("/:id", [auth, admin], async (req, res) => {
-  const { error } = validate(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
+// NOTE: Update user route
+router.patch(
+  "/:id",
+  [auth, validateObjectId, upload.single("profileImage")],
+  async (req, res) => {
+    let user = await User.findById({ _id: req.params.id });
+    if (!user)
+      return res.status(404).send("The user with given ID was not found");
 
-  const user = await findByIdAndUpdate(
-    { _id: req.params.id, isAdmin: false },
-    {
-      name: req.body.name,
-      email: req.body.email,
-      password: req.body.password,
-      isAdmin: req.body.isAdmin,
-    },
-    { new: true }
-  );
+    // INFO: The user can not change his role
+    if (req.body.role && req.user.role !== "admin") {
+      return res.status(403).send("method not allowed.");
+    }
 
-  if (!user)
-    return res.status(404).send("The user with given ID was not found");
+    // INFO: Get the profile image from req.file
+    if (req.file) {
+      clearImage(user.profileImage);
+      req.body.profileImage = req.file.path;
+    }
 
-  res.send(user);
-});
+    const { error } = validateUser(req.body);
+    if (error) return res.status(400).send(error.details[0].message);
+
+    //  INFO: Delete the old image
+    if (user.profileImage) clearImage(user.profileImage);
+
+    // INFO: The Owner or Admin can Update
+    if (
+      req.user._id.toString() === req.params.id.toString() ||
+      req.user.role === "admin"
+    ) {
+      user = await User.findByIdAndUpdate(
+        { _id: req.params.id },
+        {
+          name: req.body.name,
+          role: req.body.role,
+          profileImage: req.body.profileImage,
+        },
+        { new: true }
+      );
+      res.send(user);
+    } else {
+      return res.status(403).send("method not allowed.");
+    }
+  }
+);
 
 // INFO: Delete one User By ID
-router.delete("/:id", [auth, admin], async (req, res) => {
+router.delete("/:id", [auth, admin, validateObjectId], async (req, res) => {
   const user = await User.findByIdAndRemove({
     _id: req.params.id,
-    isAdmin: false,
   });
-  if (!user)
-    return res.status(404).send("The user with given ID was not found.");
 
+  if (!user)
+    return res.status(404).send("The User with given ID was not found.");
+
+  if (user.profileImage) {
+    clearImage(user.profileImage);
+  }
   res.send(user);
 });
 
@@ -277,5 +308,13 @@ router.post("/deletefromCart", auth, async (req, res) => {
   }
   res.send("deleted successfuilly.");
 });
+
+// INFO: delete image from image Folder
+const clearImage = (filePath) => {
+  filePath = path.join(__dirname, "..", filePath);
+  fs.unlink(filePath, (err) => {
+    return err;
+  });
+};
 
 module.exports = router;

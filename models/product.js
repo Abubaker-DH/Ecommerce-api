@@ -13,12 +13,12 @@ const productSchema = new Schema(
       minlength: 3,
       maxlength: 255,
     },
-    category: {
+    categoryId: {
       type: Schema.Types.ObjectId,
       required: true,
       ref: "Category",
     },
-    brand: {
+    brandId: {
       type: Schema.Types.ObjectId,
       required: true,
       ref: "Brand",
@@ -66,11 +66,12 @@ function validateProduct(product) {
     title: Joi.string().min(3).max(50).required(),
     price: Joi.number().required(),
     description: Joi.string().min(5).max(50).required(),
-    brand: Joi.objectId().required(),
-    category: Joi.objectId().required(),
+    brandId: Joi.objectId().required(),
+    categoryId: Joi.objectId().required(),
     images: Joi.array()
       .items(Joi.object({ imageUrl: Joi.string().required() }))
-      .min(1),
+      .min(1)
+      .max(4),
     colors: Joi.array().items(Joi.object({ colorItem: Joi.string() })),
     sizes: Joi.array().items(Joi.object({ sizeItem: Joi.string() })),
     numberInStock: Joi.number().min(0).required(),
