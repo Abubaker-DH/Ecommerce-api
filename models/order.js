@@ -1,13 +1,16 @@
 const mongoose = require("mongoose");
 
-const orderSchema = new mongoose.Schema(
+const Schema = mongoose.Schema;
+
+const orderSchema = new Schema(
   {
     orderItems: [
       {
-        productId: {  
-            type: Schema.Types.ObjectId,
-            ref: "Product",
-            required: true },
+        productId: {
+          type: Schema.Types.ObjectId,
+          ref: "Product",
+          required: true,
+        },
         quantity: { type: Number, required: true },
       },
     ],
@@ -35,9 +38,9 @@ const orderSchema = new mongoose.Schema(
     isDelivered: { type: Boolean, default: false },
     deliveredAt: { type: Date },
     userId: {
-        type: Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
   },
   { timestamps: true }

@@ -8,13 +8,31 @@ const router = express.Router();
 
 // INFO: Get all order
 router.get("/", [auth, admin], async (req, res) => {
-  const orders = await Order.find();
+  const orders = await Order.find()
+    .populate("userId", "_id name profileImage")
+    .populate({
+      path: "orderItems.productId",
+      populate: { path: "brandId", select: "name" },
+      populate: { path: "categoryId", select: "name" },
+    });
+
+  if (!orders) return res.status(404).send({ message: "Orders Not Found" });
+
   res.send(orders);
 });
 
 // INFO: Get the user order
 router.get("/", auth, async (req, res) => {
-  const orders = await Order.find({ userId: req.user._id });
+  const orders = await Order.find({ userId: req.user._id })
+    .populate("userId", "_id name profileImage")
+    .populate({
+      path: "orderItems.productId",
+      populate: { path: "brandId", select: "name" },
+      populate: { path: "categoryId", select: "name" },
+    });
+
+  if (!orders) return res.status(404).send({ message: "Orders Not Found" });
+
   res.send(orders);
 });
 
@@ -47,43 +65,41 @@ router.post("/", auth, async (req, res) => {
 // INFO: Get Order by id
 router.get("/:id", [auth, validateObjectId], async (req, res) => {
   const order = await Order.findById(req.params.id);
-  if (order) {
-    res.send(order);
-  } else {
-    res.status(404).send({ message: "Order Not Found" });
-  }
+  if (!order) return res.status(404).send({ message: "Order Not Found" });
+
+  res.send(order);
 });
 
 // INFO: Update the order after payment
 router.put("/:id/pay", [auth, validateObjectId], async (req, res) => {
   // get the order
-  const order = await Order.findById(req.params.id);
-  if (order) {
-    order.isPaid = true;
-    order.paidAt = Date.now();
-    order.paymentResult = {
-      id: req.body.id,
-      status: req.body.status,
-      update_time: req.body.update_time,
-      email_address: req.body.email_address,
-    };
-    // update and save
-    await order.save();
-    res.send({ message: "Order Paid", order });
-  } else {
-    res.status(404).send({ message: "Order Not Found" });
-  }
+  let order = await Order.findById(req.params.id);
+
+  if (!order) return res.status(404).send({ message: "Order Not Found" });
+
+  order.isPaid = true;
+  order.paidAt = Date.now();
+  order.paymentResult = {
+    id: req.body.id,
+    status: req.body.status,
+    update_time: req.body.update_time,
+    email_address: req.body.email_address,
+  };
+  // update and save
+  await order.save();
+
+  res.send({ message: "Order Paid", order });
 });
 
 // INFO: Delete by id
 router.delete("/:id", [auth, validateObjectId], async (req, res) => {
-  // get the order
+  // Get the order
   const order = await Order.findById(req.params.id);
 
   if (!order)
     return res.status(404).send(" The order with given ID was not found.");
 
-  // the owner or admin can delete the order
+  // The Owner or Admin can delete the order
   if (
     req.user._id.toString() === order.userId.toString() ||
     req.user.role === "admin"
