@@ -1,4 +1,5 @@
 const fs = require("fs");
+const path = require("path");
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
@@ -7,6 +8,7 @@ const sendMail = require("@sendgrid/mail");
 const Fawn = require("fawn");
 const {
   User,
+  validateUser,
   validateRegister,
   validateForgote,
   validateReset,
@@ -32,7 +34,7 @@ router.get("/cart", auth, async (req, res) => {
   const user = await User.findById(req.user._id).populate(
     "cartItems.productId"
   );
-  res.send(user);
+  res.send(user.cartItems);
 });
 
 // INFO: Get one user by ID
@@ -53,7 +55,11 @@ router.post("/register", async (req, res, next) => {
   let user = await User.findOne({ email: req.body.email });
   if (user) return res.status(400).send("User already registerd..");
 
-  user = new User(req.body.name, req.body.email, req.body.password);
+  user = new User({
+    name: req.body.name,
+    email: req.body.email,
+    password: req.body.password,
+  });
   // hash password
   const salt = await bcrypt.genSalt(10);
   user.password = await bcrypt.hash(user.password, salt);
@@ -103,7 +109,7 @@ router.patch(
 
     // INFO: Get the profile image from req.file
     if (req.file) {
-      clearImage(user.profileImage);
+      if (user.profileImage) clearImage(user.profileImage);
       req.body.profileImage = req.file.path;
     }
 
@@ -189,6 +195,7 @@ router.post("/forgotpassword", async (req, res, next) => {
   if (!user) return res.status(404).send("Uesr not found..");
 
   user.resetToken = resetToken;
+  // one oure token expiration
   user.resetTokenExpiration = Date.now() + 60 * (60 * 1000);
   await user.save();
 
@@ -223,12 +230,13 @@ router.post("/forgotpassword", async (req, res, next) => {
 
 // INFO: add to cart route
 router.post("/addtocart", auth, async (req, res) => {
-  if (req.user.isAdmin) return res.status(405).send("method not allowed.");
+  // if (req.user.isAdmin) return res.status(405).send("method not allowed.");
 
   const product = await Product.findById(req.body.productId);
   if (!product)
     return res.status(404).send("The product with givem ID was not found.");
 
+  // INFO: the user can not add thier product to cart
   if (req.user._id === product.userId)
     return res.status(405).send("method not allowed");
 
@@ -277,7 +285,7 @@ router.post("/addtocart", auth, async (req, res) => {
 
 // INFO: delete from cart route
 router.post("/deletefromCart", auth, async (req, res) => {
-  if (req.user.isAdmin) return res.status(405).send("method not allowed.");
+  // if (req.user.role ) return res.status(405).send("method not allowed.");
 
   const product = await Product.findById(req.body.productId);
   if (!product)
@@ -304,9 +312,8 @@ router.post("/deletefromCart", auth, async (req, res) => {
 
     res.send("Added successfully.");
   } catch (ex) {
-    res.status(500).send("Somthing failed while add to cart.");
+    res.status(500).send("Somthing failed while deleting from Cart.");
   }
-  res.send("deleted successfuilly.");
 });
 
 // INFO: delete image from image Folder

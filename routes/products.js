@@ -42,8 +42,7 @@ router.post("/", [auth, upload.array("images", 4)], async (req, res) => {
     images[i] = { imageUrl: req.files[i].path };
   }
 
-  // NOTE: Add user and images becouse we validate the product
-  req.body.user = req.user._id;
+  // NOTE: Add images becouse we validate the product
   req.body.images = images;
 
   // validate data send by user
@@ -78,7 +77,7 @@ router.post("/", [auth, upload.array("images", 4)], async (req, res) => {
 });
 
 // INFO: update product route
-router.put(
+router.patch(
   "/:id",
   [auth, validateObjectId, upload.array("images", 4)],
   async (req, res) => {
@@ -96,21 +95,27 @@ router.put(
     const category = await Category.findById(req.body.categoryId);
     if (!category) return res.status(400).send("Invalid category.");
 
-    let images = [];
-    if (req.files) {
-      for (i = 0; i < req.files.length; i++) {
-        images[i] = { imageUrl: req.files[i].path };
+    // INFO: if the user delete an exist image will remove it from images folder
+    if (product.images.length != req.body.images.length) {
+      for (i = 0; i < product.images.length; i++) {
+        if (
+          req.body.images.some(
+            (x) => x.imageUrl === product.images[i].imageUrl
+          ) == false
+        ) {
+          clearImage(product.images[i].imageUrl);
+        }
       }
-
-      for (j = 0; j < product.images.length; j++) {
-        clearImage(product.images[j]);
-      }
-    } else {
-      req.body.images = product.images;
     }
 
-    //   if (!imageUrl) return res.status(422).send("No files picked");
-    //   if (imageUrl !== product.imageUrl) clearImage(product.imageUrl);
+    let images = req.body.images;
+    if (req.files) {
+      for (i = 0; i < req.files.length; i++) {
+        images.push({ imageUrl: req.files[i].path });
+      }
+    }
+
+    req.body.images = images;
 
     // NOTE: The owner or admin can update the product
     if (
@@ -153,7 +158,7 @@ router.delete("/:id", [auth, validateObjectId], async (req, res) => {
   ) {
     // NOTE: Delete all Images
     for (j = 0; j < product.images.length; j++) {
-      clearImage(product.images[j]);
+      clearImage(product.images[j].imageUrl);
     }
     await Product.findByIdAndRemove(req.params.id);
     res.send({ product: product, message: "Product deleted." });

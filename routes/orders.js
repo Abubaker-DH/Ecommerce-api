@@ -10,11 +10,7 @@ const router = express.Router();
 router.get("/", [auth, admin], async (req, res) => {
   const orders = await Order.find()
     .populate("userId", "_id name profileImage")
-    .populate({
-      path: "orderItems.productId",
-      populate: { path: "brandId", select: "name" },
-      populate: { path: "categoryId", select: "name" },
-    });
+    .populate("orderItems.productId");
 
   if (!orders) return res.status(404).send({ message: "Orders Not Found" });
 
@@ -22,7 +18,7 @@ router.get("/", [auth, admin], async (req, res) => {
 });
 
 // INFO: Get the user order
-router.get("/", auth, async (req, res) => {
+router.get("/me", auth, async (req, res) => {
   const orders = await Order.find({ userId: req.user._id })
     .populate("userId", "_id name profileImage")
     .populate({
@@ -63,8 +59,14 @@ router.post("/", auth, async (req, res) => {
 });
 
 // INFO: Get Order by id
-router.get("/:id", [auth, validateObjectId], async (req, res) => {
-  const order = await Order.findById(req.params.id);
+router.get("/:id", [auth, admin, validateObjectId], async (req, res) => {
+  const order = await Order.findById(req.params.id)
+    .populate("userId", "_id name profileImage")
+    .populate({
+      path: "orderItems.productId",
+      populate: { path: "brandId", select: "name" },
+      populate: { path: "categoryId", select: "name" },
+    });
   if (!order) return res.status(404).send({ message: "Order Not Found" });
 
   res.send(order);
@@ -92,22 +94,15 @@ router.put("/:id/pay", [auth, validateObjectId], async (req, res) => {
 });
 
 // INFO: Delete by id
-router.delete("/:id", [auth, validateObjectId], async (req, res) => {
+router.delete("/:id", [auth, admin, validateObjectId], async (req, res) => {
   // Get the order
   const order = await Order.findById(req.params.id);
 
   if (!order)
     return res.status(404).send(" The order with given ID was not found.");
 
-  // The Owner or Admin can delete the order
-  if (
-    req.user._id.toString() === order.userId.toString() ||
-    req.user.role === "admin"
-  ) {
-    await Order.findByIdAndRemove(req.params.id);
-    res.send({ order: order, message: "Order deleted." });
-  }
-  return res.status(405).send("Method not allowed.");
+  await Order.findByIdAndRemove(req.params.id);
+  res.send({ order: order, message: "Order deleted." });
 });
 
 module.exports = router;

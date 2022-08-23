@@ -55,7 +55,10 @@ router.delete("/:id", [auth, admin, validateObjectId], async (req, res) => {
 
 // INFO: get one brand route
 router.get("/:id", validateObjectId, async (req, res) => {
-  const brand = await Brand.findById(req.params.id).select("-__v");
+  const brand = await Brand.findById(req.params.id).populate(
+    "userId",
+    "_id name email"
+  );
 
   if (!brand)
     return res.status(404).send("The brand with the given ID was not found.");

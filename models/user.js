@@ -26,11 +26,11 @@ const userSchema = new Schema(
       maxlength: 1024,
     },
     profileImage: { type: String },
-    role: { 
+    role: {
       type: String,
       enum: ["user", "admin"],
       default: "user",
-     }, 
+    },
     resetToken: String,
     resetTokenExpiration: Date,
     cartItems: [
@@ -51,7 +51,7 @@ const userSchema = new Schema(
 
 userSchema.pre("remove", function (next) {
   productSchema.remove({ user: this._id }).exec();
-//   orderSchema.remove({ user: this._id }).exec();
+  //   orderSchema.remove({ user: this._id }).exec();
   next();
 });
 
@@ -60,6 +60,15 @@ userSchema.methods.clearCart = function () {
   this.cartItems = [];
   return this.save();
 };
+
+function validateUser(user) {
+  const schema = Joi.object({
+    name: Joi.string().min(4).max(10),
+    profileImage: Joi.string(),
+    role: Joi.string(),
+  });
+  return schema.validate(user);
+}
 
 function validateRegister(user) {
   const schema = Joi.object({
@@ -109,6 +118,7 @@ userSchema.methods.matchPassword = async function (password) {
 
 module.exports.User = mongoose.model("User", userSchema);
 exports.userSchema = userSchema;
+module.exports.validateUser = validateUser;
 module.exports.validateRegister = validateRegister;
 module.exports.validateLogin = validateLogin;
 module.exports.validateReset = validateReset;
