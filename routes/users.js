@@ -31,9 +31,11 @@ router.get("/", [auth, admin], async (req, res) => {
 
 // INFO: cart route
 router.get("/cart", auth, async (req, res) => {
-  const user = await User.findById(req.user._id).populate(
-    "cartItems.productId"
-  );
+  const user = await User.findById(req.user._id).populate({
+    path: "cartItems.productId",
+    populate: { path: "brandId", select: "name" },
+    populate: { path: "categoryId", select: "name" },
+  });
   res.send(user.cartItems);
 });
 
@@ -60,7 +62,7 @@ router.post("/register", async (req, res, next) => {
     email: req.body.email,
     password: req.body.password,
   });
-  // hash password
+  // INFO: hash password
   const salt = await bcrypt.genSalt(10);
   user.password = await bcrypt.hash(user.password, salt);
 
@@ -77,7 +79,7 @@ router.post("/register", async (req, res, next) => {
 
 // INFO: Login or signIn route
 router.post("/login", async (req, res, next) => {
-  // check if the user send all the data
+  // NOTE: check if the user send all the data
   const { error } = validateLogin(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
@@ -87,7 +89,7 @@ router.post("/login", async (req, res, next) => {
   const isMatch = await user.matchPassword(req.body.password);
   if (!isMatch) return res.status(400).send("Invalid email or password..");
 
-  // generate token
+  // NOTE: generate token
   const token = user.generateAuthToken();
 
   res.send(token);
@@ -168,7 +170,7 @@ router.put("/resetpassword/:resetToken", async (req, res, next) => {
   const { error } = validateReset(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
-  // hash password
+  // INFO: hash password
   const salt = await bcrypt.genSalt(10);
   user.password = await bcrypt.hash(req.body.password, salt);
   user.resetToken = undefined;
@@ -180,22 +182,22 @@ router.put("/resetpassword/:resetToken", async (req, res, next) => {
 
 // INFO: Forgot Password route
 router.post("/forgotpassword", async (req, res, next) => {
-  // validate email of user
+  // NOTE: validate email of user
   const { error } = validateForgote(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
-  // create 32 random bytes or char
+  // NOTE: create 32 random bytes or char
   const buffer = crypto.randomBytes(32);
   if (error) return res.send(error);
   // convert buffer to string as Token
   const resetToken = buffer.toString("hex");
 
-  // find user by email
+  // NOTE: find user by email
   let user = await User.findOne({ email: req.body.email });
   if (!user) return res.status(404).send("Uesr not found..");
 
   user.resetToken = resetToken;
-  // one oure token expiration
+  // INFO: one houre token expiration
   user.resetTokenExpiration = Date.now() + 60 * (60 * 1000);
   await user.save();
 
@@ -230,8 +232,6 @@ router.post("/forgotpassword", async (req, res, next) => {
 
 // INFO: add to cart route
 router.post("/addtocart", auth, async (req, res) => {
-  // if (req.user.isAdmin) return res.status(405).send("method not allowed.");
-
   const product = await Product.findById(req.body.productId);
   if (!product)
     return res.status(404).send("The product with givem ID was not found.");
@@ -245,7 +245,7 @@ router.post("/addtocart", auth, async (req, res) => {
   // let newQuantity;
   const updatedCartItems = [...user.cartItems];
 
-  // find the product index
+  // INFO: find the product index
   const cartProductIndex = user.cartItems.findIndex((cp) => {
     return cp.productId.toString() === product._id.toString();
   });
