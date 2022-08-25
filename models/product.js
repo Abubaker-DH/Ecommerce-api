@@ -70,7 +70,6 @@ function validateProduct(product) {
     categoryId: Joi.objectId().required(),
     images: Joi.array()
       .items(Joi.object({ imageUrl: Joi.string().required() }))
-      .min(1)
       .max(4),
     colors: Joi.array().items(Joi.object({ colorItem: Joi.string() })),
     sizes: Joi.array().items(Joi.object({ sizeItem: Joi.string() })),
