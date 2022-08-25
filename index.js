@@ -43,4 +43,5 @@ mongoose
   )
   .catch((error) => console.log("Error connecting to DB...", error));
 
-// shoes - cloth - jewelry
+//type => shoes - cloth - jewelry
+//gender => men - women - kids

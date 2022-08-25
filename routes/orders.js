@@ -1,8 +1,10 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const auth = require("../middleware/auth");
 const admin = require("../middleware/admin");
 const validateObjectId = require("../middleware/validateObjectId");
 const { Order } = require("../models/order");
+const { Product } = require("../models/product");
 const { User } = require("../models/user");
 const router = express.Router();
 
@@ -34,28 +36,51 @@ router.get("/me", auth, async (req, res) => {
 
 // INFO: Create order
 router.post("/", auth, async (req, res) => {
-  const cartProduct = await User.findById(req.user._id).populate(
-    "cartItems.productId"
-  );
+  const user = await User.findById(req.user._id);
 
   // if we don't have items in the cart
-  if (cartProduct.length === 0) {
+  if (user.cartItems.length === 0) {
     return res.status(400).send({ message: "Cart is empty" });
   }
 
-  const order = new Order({
-    orderItems: cartProduct,
-    shippingAddress: req.body.shippingAddress,
-    paymentMethod: req.body.paymentMethod,
-    shippingPrice: req.body.shippingPrice,
-    itemsPrice: req.body.itemsPrice,
-    taxPrice: req.body.taxPrice,
-    totalPrice: req.body.totalPrice,
-    userId: req.user._id,
-  });
-  // save the order in DB
-  await order.save();
-  res.status(201).send({ message: "New Order Created", order });
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const order = new Order(
+      {
+        orderItems: user.cartItems,
+        shippingAddress: req.body.shippingAddress,
+        paymentMethod: req.body.paymentMethod,
+        shippingPrice: req.body.shippingPrice,
+        itemsPrice: req.body.itemsPrice,
+        taxPrice: req.body.taxPrice,
+        totalPrice: req.body.totalPrice,
+        userId: req.user._id,
+      },
+      { session }
+    );
+
+    // save the order in DB
+    order.save(session);
+
+    for (i = 0; i < user.cartItems.length; i++) {
+      const p = await Product.findById(user.cartItems[i].productId);
+      p.numberInStock = p.numberInStock - user.cartItems[i].quantity;
+      p.save(session);
+    }
+
+    // INFO: Clear user Cart
+    user.cartItems = [];
+    user.save(session);
+
+    res.status(201).send({ message: "New Order Created", order });
+  } catch (error) {
+    console.log("Error occur While create new Order", error);
+    await session.abortTransaction();
+  } finally {
+    await session.endSession();
+  }
 });
 
 // INFO: Get Order by id
@@ -91,6 +116,22 @@ router.put("/:id/pay", [auth, validateObjectId], async (req, res) => {
   await order.save();
 
   res.send({ message: "Order Paid", order });
+});
+
+// INFO: Update the order after Delevered
+router.put("/:id/deliver", [auth, validateObjectId], async (req, res) => {
+  // get the order
+  let order = await Order.findById(req.params.id);
+
+  if (!order) return res.status(404).send({ message: "Order Not Found" });
+
+  order.isDelivered = true;
+  order.deliveredAt = Date.now();
+
+  // update and save
+  await order.save();
+
+  res.send({ message: "Order Delivered", order });
 });
 
 // INFO: Delete by id

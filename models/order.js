@@ -12,6 +12,8 @@ const orderSchema = new Schema(
           required: true,
         },
         quantity: { type: Number, required: true },
+        color: { type: String, required: true },
+        size: { type: String, required: true },
       },
     ],
     shippingAddress: {

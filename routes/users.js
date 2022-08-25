@@ -5,7 +5,6 @@ const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 const lodash = require("lodash");
 const sendMail = require("@sendgrid/mail");
-const Fawn = require("fawn");
 const {
   User,
   validateUser,
@@ -234,10 +233,10 @@ router.post("/forgotpassword", async (req, res, next) => {
 router.post("/addtocart", auth, async (req, res) => {
   const product = await Product.findById(req.body.productId);
   if (!product)
-    return res.status(404).send("The product with givem ID was not found.");
+    return res.status(404).send("The product with given ID was not found.");
 
   // INFO: the user can not add thier product to cart
-  if (req.user._id === product.userId)
+  if (req.user._id.toString() === product.userId.toString())
     return res.status(405).send("method not allowed");
 
   const user = await User.findById(req.user._id);
@@ -258,7 +257,7 @@ router.post("/addtocart", auth, async (req, res) => {
   } else {
     // if we don't add new product
     updatedCartItems.push({
-      productId: product._id,
+      productId: req.body.productId,
       quantity: req.body.quantity,
       color: req.body.color,
       size: req.body.size,
@@ -266,27 +265,16 @@ router.post("/addtocart", auth, async (req, res) => {
   }
 
   user.cartItems = updatedCartItems;
+  // product.numberInStock = product.numberInStock - req.body.quantity;
 
-  try {
-    new Fawn.Task()
-      .save("users", user)
-      .update(
-        "products",
-        { _id: product._id },
-        { $dic: { numberInStock: req.body.quantity } }
-      )
-      .run();
+  // await product.save();
+  await user.save();
 
-    res.send("Added successfully.");
-  } catch (ex) {
-    res.status(500).send("Somthing failed while add to cart.");
-  }
+  res.send("Added successfully.");
 });
 
 // INFO: delete from cart route
 router.post("/deletefromCart", auth, async (req, res) => {
-  // if (req.user.role ) return res.status(405).send("method not allowed.");
-
   const product = await Product.findById(req.body.productId);
   if (!product)
     return res.status(404).send("The product with givem ID was not found.");
@@ -298,22 +286,12 @@ router.post("/deletefromCart", auth, async (req, res) => {
   });
 
   user.cartItems = updatedCartItems;
+  // product.numberInStock = product.numberInStock + req.body.quantity;
 
-  // return user.save();
-  try {
-    new Fawn.Task()
-      .save("users", user)
-      .update(
-        "products",
-        { _id: req.body.productId },
-        { $inc: { numberInStock: updatedCartItems.quantity } }
-      )
-      .run();
+  await user.save();
+  // await product.save();
 
-    res.send("Added successfully.");
-  } catch (ex) {
-    res.status(500).send("Somthing failed while deleting from Cart.");
-  }
+  res.send("Delete successfully.");
 });
 
 // INFO: delete image from image Folder
