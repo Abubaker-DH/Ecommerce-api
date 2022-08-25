@@ -3,6 +3,11 @@ const path = require("path");
 const express = require("express");
 const Joi = require("joi");
 const mongoose = require("mongoose");
+const rateLimit = require("express-rate-limit");
+const cors = require("cors");
+const helmet = require("helmet");
+const compression = require("compression");
+const xss = require("xss-clean");
 const brands = require("./routes/brands");
 const orders = require("./routes/orders");
 const users = require("./routes/users");
@@ -13,6 +18,22 @@ Joi.objectId = require("joi-objectid")(Joi);
 
 const app = express();
 app.use(express.json());
+
+// INFO: if we behind a proxy
+app.set("trust proxy", 1);
+// INFO: use it to limit number of reqest
+app.use(
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+  })
+);
+
+//  INFO: production packages
+app.use(cors());
+app.use(xss());
+app.use(helmet());
+app.use(compression());
 
 // INFO: path for ststic file
 app.use("/images", express.static(path.join(__dirname, "images")));
