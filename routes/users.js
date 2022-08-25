@@ -22,6 +22,12 @@ const router = express.Router();
 
 sendMail.setApiKey(process.env.SENDGRID_API_KEY);
 
+// INFO: Profile
+router.get("/profile", auth, async (req, res) => {
+  const user = await User.find(req.user._id).select("-cartItems");
+  res.send(user);
+});
+
 // INFO: Get all users
 router.get("/", [auth, admin], async (req, res) => {
   const user = await User.find();

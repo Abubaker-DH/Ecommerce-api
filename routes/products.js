@@ -21,6 +21,9 @@ router.get("/", async (req, res) => {
       .populate("categoryId", "name")
       .populate("userId", "_id name profileImage")
       .select("-__v");
+
+    if (!products) return res.status(400).send("Products was not found.");
+
     res.send(products);
   }
 
@@ -29,6 +32,21 @@ router.get("/", async (req, res) => {
     .populate("categoryId", "name")
     .populate("userId", "_id name profileImage")
     .select("-__v");
+
+  if (!products) return res.status(400).send("Products was not found.");
+
+  res.send(products);
+});
+
+router.get("/me", auth, async (req, res) => {
+  const products = await Product.find({ userId: req.user._id })
+    .populate("brandId", "name")
+    .populate("categoryId", "name")
+    .populate("userId", "_id name profileImage")
+    .select("-__v");
+
+  if (!products) return res.status(400).send("Products was not found.");
+
   res.send(products);
 });
 
