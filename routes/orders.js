@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const stripe = require("stripe")(process.env.STRIPE_KEY);
 const auth = require("../middleware/auth");
 const admin = require("../middleware/admin");
 const validateObjectId = require("../middleware/validateObjectId");
@@ -104,18 +105,31 @@ router.put("/:id/pay", [auth, validateObjectId], async (req, res) => {
 
   if (!order) return res.status(404).send({ message: "Order Not Found" });
 
-  order.isPaid = true;
-  order.paidAt = Date.now();
-  order.paymentResult = {
-    id: req.body.id,
-    status: req.body.status,
-    update_time: req.body.update_time,
-    email_address: req.body.email_address,
-  };
-  // update and save
-  await order.save();
-
-  res.send({ message: "Order Paid", order });
+  stripe.charges.create(
+    {
+      amount: req.body.amount,
+      currency: req.body.currency,
+      source: req.body.source,
+      receipt_email: req.user.email,
+      metadata: { order: order },
+    },
+    (stripeErr, stripeRes) => {
+      if (stripeErr) {
+        res.status(500).send(stripeErr);
+      } else {
+        order.isPaid = true;
+        order.paidAt = Date.now();
+        order.paymentResult = {
+          id: stripeRes.id,
+          status: stripeRes.status,
+          update_time: stripeRes.created,
+        };
+        // update and save
+        order.save();
+        res.send({ message: `Order Paid ${stripeRes.status}` });
+      }
+    }
+  );
 });
 
 // INFO: Update the order after Delevered

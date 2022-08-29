@@ -111,7 +111,7 @@ router.patch(
 
     // INFO: The user can not change his role
     if (req.body.role && req.user.role !== "admin") {
-      return res.status(403).send("method not allowed.");
+      return res.status(403).send("Method not allowed.");
     }
 
     // INFO: Get the profile image from req.file
@@ -142,7 +142,7 @@ router.patch(
       );
       res.send(user);
     } else {
-      return res.status(403).send("method not allowed.");
+      return res.status(403).send("Method not allowed.");
     }
   }
 );
@@ -241,9 +241,14 @@ router.post("/addtocart", auth, async (req, res) => {
   if (!product)
     return res.status(404).send("The product with given ID was not found.");
 
+  if (req.body.quantity > product.numberInStock)
+    return res
+      .status(400)
+      .send(`We just have ${product.numberInStock} items from this Product.`);
+
   // INFO: the user can not add thier product to cart
   if (req.user._id.toString() === product.userId.toString())
-    return res.status(405).send("method not allowed");
+    return res.status(405).send("Method not allowed");
 
   const user = await User.findById(req.user._id);
 
