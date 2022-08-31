@@ -110,7 +110,7 @@ router.patch(
       return res.status(404).send("The user with given ID was not found");
 
     // INFO: The user can not change his role
-    if (req.body.role && req.user.role !== "admin") {
+    if (req.body.role && req.user.role !== "super") {
       return res.status(403).send("Method not allowed.");
     }
 
@@ -149,6 +149,11 @@ router.patch(
 
 // INFO: Delete one User By ID
 router.delete("/:id", [auth, admin, validateObjectId], async (req, res) => {
+  // INFO: The super admin is allowed to delete a user
+  if (req.user.role !== "super") {
+    return res.status(403).send("Method not allowed.");
+  }
+
   const user = await User.findByIdAndRemove({
     _id: req.params.id,
   });
