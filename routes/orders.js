@@ -4,7 +4,7 @@ const stripe = require("stripe")(process.env.STRIPE_KEY);
 const auth = require("../middleware/auth");
 const admin = require("../middleware/admin");
 const validateObjectId = require("../middleware/validateObjectId");
-const { Order } = require("../models/order");
+const { Order, validateOrder } = require("../models/order");
 const { Product } = require("../models/product");
 const { User } = require("../models/user");
 const router = express.Router();
@@ -39,10 +39,13 @@ router.get("/me", auth, async (req, res) => {
 router.post("/", auth, async (req, res) => {
   const user = await User.findById(req.user._id);
 
-  // if we don't have items in the cart
+  // NOTE: if we don't have items in the cart
   if (user.cartItems.length === 0) {
     return res.status(400).send({ message: "Cart is empty" });
   }
+
+  const { error } = validateOrder(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
 
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -62,9 +65,10 @@ router.post("/", auth, async (req, res) => {
       { session }
     );
 
-    // save the order in DB
+    // NOTE: save the order in DB
     order.save(session);
 
+    // INFO: decrement the product item count
     for (i = 0; i < user.cartItems.length; i++) {
       const p = await Product.findById(user.cartItems[i].productId);
       p.numberInStock = p.numberInStock - user.cartItems[i].quantity;

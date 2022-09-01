@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Joi = require("joi");
 
 const Schema = mongoose.Schema;
 
@@ -48,4 +49,35 @@ const orderSchema = new Schema(
   { timestamps: true }
 );
 
+function validateOrder(order) {
+  const schema = Joi.object({
+    orderItems: Joi.array()
+      .items(
+        Joi.object({
+          productId: Joi.objectId().required(),
+          quantity: joi.number().required(),
+          color: joi.string().required(),
+          size: joi.string().required(),
+        })
+      )
+      .required(),
+    shippingAddress: Joi.object({
+      fullName: joi.string().required(),
+      phone: joi.string().required(),
+      address: joi.string().required(),
+      city: joi.string().required(),
+      postalCode: joi.string().required(),
+      country: joi.string().required(),
+    }).required(),
+    paymentMethod: Joi.string().required(),
+    shippingPrice: Joi.number().required(),
+    taxPrice: Joi.number().required(),
+    totalPrice: Joi.number().required(),
+    itemsPrice: Joi.number().required(),
+  });
+
+  return schema.validate(order);
+}
+
 module.exports.Order = mongoose.model("Order", orderSchema);
+exports.validateOrder = validateOrder;
