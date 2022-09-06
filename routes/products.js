@@ -9,7 +9,7 @@ const { Category } = require("../models/category");
 const { Brand } = require("../models/brand");
 const router = express.Router();
 
-// INFO: get all products or search by title
+// INFO: Get all products or search by title
 router.get("/", async (req, res) => {
   let title = req.query.title;
   let products;
@@ -38,6 +38,7 @@ router.get("/", async (req, res) => {
   res.send(products);
 });
 
+// INFO: Get all user products
 router.get("/me", auth, async (req, res) => {
   const products = await Product.find({ userId: req.user._id })
     .populate("brandId", "name")
@@ -50,7 +51,7 @@ router.get("/me", auth, async (req, res) => {
   res.send(products);
 });
 
-// INFO: add new product route
+// INFO: Create new product route
 router.post("/", [auth, upload.array("images", 4)], async (req, res) => {
   if (!req.files) return res.status(422).send("No image provided.");
 
@@ -67,11 +68,11 @@ router.post("/", [auth, upload.array("images", 4)], async (req, res) => {
   const { error } = validateProduct(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
-  // find brand by id
+  // NOTE: Thisfind brand by id
   const brand = await Brand.findById(req.body.brandId);
   if (!brand) return res.status(400).send("Invalid brand.");
 
-  // find category by id
+  // NOTE: Thisfind brand bycategory by id
   const category = await Category.findById(req.body.categoryId);
   if (!category) return res.status(400).send("Invalid category.");
 
@@ -94,7 +95,7 @@ router.post("/", [auth, upload.array("images", 4)], async (req, res) => {
     .send({ product: product, message: "Added new product seccessfully." });
 });
 
-// INFO: update product route
+// INFO: Update product route
 router.patch(
   "/:id",
   [auth, validateObjectId, upload.array("images", 4)],

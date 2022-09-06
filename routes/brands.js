@@ -44,7 +44,9 @@ router.put("/:id", [auth, admin, validateObjectId], async (req, res) => {
 });
 
 // INFO: delete brand route
-router.delete("/:id", [auth, admin, validateObjectId], async (req, res) => {
+router.delete("/:id", [auth, validateObjectId], async (req, res) => {
+  if (req.user.role !== "super") return res.status(401).send("Access denied.");
+
   const brand = await Brand.findByIdAndRemove(req.params.id);
 
   if (!brand)

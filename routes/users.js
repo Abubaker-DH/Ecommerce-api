@@ -18,14 +18,22 @@ const admin = require("../middleware/admin");
 const validateObjectId = require("../middleware/validateObjectId");
 const { upload } = require("../middleware/upload");
 const { Product } = require("../models/product");
+const { Order } = require("../models/order");
 const router = express.Router();
 
 sendMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 // INFO: Profile
 router.get("/profile", auth, async (req, res) => {
-  const user = await User.find(req.user._id).select("-cartItems");
-  res.send(user);
+  const userData = await User.find(req.user._id)
+    .populate({
+      path: "orderItems.orderId",
+      populate: { path: "productId" },
+    })
+    .select(
+      "-password -resetToken -resetTokenExpiration -cartItems -cartItems -role"
+    );
+  res.send(userData);
 });
 
 // INFO: Get all users
@@ -148,7 +156,7 @@ router.patch(
 );
 
 // INFO: Delete one User By ID
-router.delete("/:id", [auth, admin, validateObjectId], async (req, res) => {
+router.delete("/:id", [auth, validateObjectId], async (req, res) => {
   // INFO: The super admin is allowed to delete a user
   if (req.user.role !== "super") {
     return res.status(403).send("Method not allowed.");
@@ -223,7 +231,6 @@ router.post("/forgotpassword", async (req, res, next) => {
     from: process.env.EMAIL, // Change to your verified sender
     subject: "Password Reset",
     text: text,
-    // html: options.html,
   };
 
   sendMail
@@ -241,7 +248,7 @@ router.post("/forgotpassword", async (req, res, next) => {
 });
 
 // INFO: add to cart route
-router.post("/addtocart", auth, async (req, res) => {
+router.post("/add-to-cart", auth, async (req, res) => {
   const product = await Product.findById(req.body.productId);
   if (!product)
     return res.status(404).send("The product with given ID was not found.");
@@ -281,16 +288,14 @@ router.post("/addtocart", auth, async (req, res) => {
   }
 
   user.cartItems = updatedCartItems;
-  // product.numberInStock = product.numberInStock - req.body.quantity;
 
-  // await product.save();
   await user.save();
 
   res.send("Added successfully.");
 });
 
-// INFO: delete from cart route
-router.post("/deletefromCart", auth, async (req, res) => {
+// INFO: Delete from cart route
+router.post("/delete-from-Cart", auth, async (req, res) => {
   const product = await Product.findById(req.body.productId);
   if (!product)
     return res.status(404).send("The product with givem ID was not found.");
@@ -302,12 +307,44 @@ router.post("/deletefromCart", auth, async (req, res) => {
   });
 
   user.cartItems = updatedCartItems;
-  // product.numberInStock = product.numberInStock + req.body.quantity;
 
   await user.save();
-  // await product.save();
 
   res.send("Delete successfully.");
+});
+
+// INFO: Cencle order item from user.orderItems array
+router.post("/cencle-order", auth, async (req, res) => {
+  // Get the order
+  const order = await Order.findById(req.body.orderId);
+  if (!order)
+    return res.status(404).send(" The order with given ID was not found.");
+
+  const user = await User.findById(req.user._id);
+
+  if (user._id.toString() !== order.userId.toString())
+    return res.status(401).send("Access denied.");
+
+  const updatedOrderItems = user.orderItems.filter((item) => {
+    return item.orderId.toString() !== req.body.orderId.toString();
+  });
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    user.orderItems = updatedOrderItems;
+
+    user.save(session);
+    await Order.findByIdAndRemove(req.body.orderId, { session });
+
+    res.send("order cencled.");
+  } catch (error) {
+    console.log("Error occur While create new Order", error);
+    await session.abortTransaction();
+  } finally {
+    await session.endSession();
+  }
 });
 
 // INFO: delete image from image Folder
