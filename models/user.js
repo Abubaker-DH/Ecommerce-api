@@ -59,8 +59,8 @@ const userSchema = new Schema(
 );
 
 userSchema.pre("remove", function (next) {
-  productSchema.remove({ user: this._id }).exec();
-  //   orderSchema.remove({ user: this._id }).exec();
+  productSchema.remove({ userId: this._id }).exec();
+  //   orderSchema.remove({ userId: this._id }).exec();
   next();
 });
 
