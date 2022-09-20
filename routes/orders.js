@@ -31,6 +31,8 @@ router.get("/me", auth, async (req, res) => {
     path: "orderItems.productId",
     populate: { path: "brandId", select: "name" },
     populate: { path: "categoryId", select: "name" },
+    populate: { path: "typeId", select: "name" },
+    populate: { path: "genreId", select: "name" },
   });
 
   if (!orders) return res.status(404).send({ message: "Orders Not Found" });
@@ -109,6 +111,8 @@ router.get("/:id", [auth, validateObjectId], async (req, res) => {
       path: "orderItems.productId",
       populate: { path: "brandId", select: "name" },
       populate: { path: "categoryId", select: "name" },
+      populate: { path: "genreId", select: "name" },
+      populate: { path: "typeId", select: "name" },
     });
   if (!order) return res.status(404).send({ message: "Order Not Found" });
 
