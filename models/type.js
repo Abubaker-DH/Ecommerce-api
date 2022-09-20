@@ -1,10 +1,10 @@
-// INFO: Boots - Dresses - High Heels
+// INFO: Shoes - Cloth - Jewelry - Makeup
 const Joi = require("joi");
 const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
-const genreSchema = new Schema(
+const typeSchema = new Schema(
   {
     name: {
       type: String,
@@ -21,14 +21,14 @@ const genreSchema = new Schema(
   { timestamps: true }
 );
 
-function validateGenre(genre) {
+function validateType(type) {
   const schema = Joi.object({
     name: Joi.string().min(3).max(10).required(),
   });
 
-  return schema.validate(genre);
+  return schema.validate(type);
 }
 
-module.exports.Genre = mongoose.model("Genre", genreSchema);
-exports.genreSchema = genreSchema;
-exports.validateGenre = validateGenre;
+module.exports.Type = mongoose.model("Type", typeSchema);
+exports.typeSchema = typeSchema;
+exports.validateType = validateType;

@@ -63,5 +63,3 @@ mongoose
     app.listen(PORT, () => console.log(`server running on port ${PORT} ...`))
   )
   .catch((error) => console.log("Error connecting to DB...", error));
-
-//type => shoes - cloth - jewelry
