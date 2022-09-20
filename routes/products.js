@@ -18,6 +18,8 @@ router.get("/", async (req, res) => {
       title: { $regex: title, $options: "i" },
     })
       .populate("brandId", "name")
+      .populate("typeId", "name")
+      .populate("genreId", "name")
       .populate("categoryId", "name")
       .populate("userId", "_id name profileImage")
       .select("-__v");
@@ -29,6 +31,8 @@ router.get("/", async (req, res) => {
 
   products = await Product.find()
     .populate("brandId", "name")
+    .populate("typeId", "name")
+    .populate("genreId", "name")
     .populate("categoryId", "name")
     .populate("userId", "_id name profileImage")
     .select("-__v");
@@ -43,6 +47,8 @@ router.get("/me", auth, async (req, res) => {
   const products = await Product.find({ userId: req.user._id })
     .populate("brandId", "name")
     .populate("categoryId", "name")
+    .populate("typeId", "name")
+    .populate("genreId", "name")
     .populate("userId", "_id name profileImage")
     .select("-__v");
 
@@ -68,13 +74,24 @@ router.post("/", [auth, upload.array("images", 4)], async (req, res) => {
   const { error } = validateProduct(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
-  // NOTE: Thisfind brand by id
-  const brand = await Brand.findById(req.body.brandId);
-  if (!brand) return res.status(400).send("Invalid brand.");
+  // NOTE: find brand by id
+  let brand;
+  if (req.body.brandId) {
+    brand = await Brand.findById(req.body.brandId);
+    if (!brand) return res.status(400).send("Invalid brand.");
+  }
 
-  // NOTE: Thisfind brand bycategory by id
+  // NOTE: find category by id
   const category = await Category.findById(req.body.categoryId);
   if (!category) return res.status(400).send("Invalid category.");
+
+  // NOTE: find type by id
+  const type = await Category.findById(req.body.categoryId);
+  if (!type) return res.status(400).send("Invalid type.");
+
+  // NOTE: find genre by id
+  const genre = await Category.findById(req.body.categoryId);
+  if (!genre) return res.status(400).send("Invalid genre.");
 
   const product = new Product({
     title: req.body.title,
@@ -82,12 +99,15 @@ router.post("/", [auth, upload.array("images", 4)], async (req, res) => {
     colors: req.body.colors,
     sizes: req.body.sizes,
     brandId: brand._id,
+    typeId: type._id,
+    genreId: genre._id,
     categoryId: category._id,
     numberInStock: req.body.numberInStock,
     description: req.body.description,
     price: req.body.price,
     userId: req.user._id,
   });
+
   await product.save();
 
   res
@@ -107,12 +127,23 @@ router.patch(
     if (error) return res.status(400).send(error.details[0].message);
 
     // find brand by id
-    const brand = await Brand.findById(req.body.brandId);
-    if (!brand) return res.status(400).send("Invalid brand.");
+    let brand;
+    if (req.body.brandId) {
+      brand = await Brand.findById(req.body.brandId);
+      if (!brand) return res.status(400).send("Invalid brand.");
+    }
 
     // find category by id
     const category = await Category.findById(req.body.categoryId);
     if (!category) return res.status(400).send("Invalid category.");
+
+    // NOTE: find type by id
+    const type = await Category.findById(req.body.categoryId);
+    if (!type) return res.status(400).send("Invalid type.");
+
+    // NOTE: find genre by id
+    const genre = await Category.findById(req.body.categoryId);
+    if (!genre) return res.status(400).send("Invalid genre.");
 
     // INFO: if the user delete an exist image will remove it from images folder
     if (product.images.length != req.body.images.length) {
@@ -149,8 +180,10 @@ router.patch(
       {
         title: req.body.title,
         images: req.body.images,
-        brandId: req.body.brandId,
-        categoryId: req.body.categoryId,
+        brandId: brand._id,
+        categoryId: category._id,
+        typeId: type._id,
+        genreId: genre._id,
         colors: req.body.colors,
         sizes: req.body.sizes,
         numberInStock: req.body.numberInStock,

@@ -18,9 +18,18 @@ const productSchema = new Schema(
       required: true,
       ref: "Category",
     },
-    brandId: {
+    typeId: {
       type: Schema.Types.ObjectId,
       required: true,
+      ref: "Type",
+    },
+    genreId: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "Genre",
+    },
+    brandId: {
+      type: Schema.Types.ObjectId,
       ref: "Brand",
     },
     images: [
@@ -66,8 +75,10 @@ function validateProduct(product) {
     title: Joi.string().min(3).max(50).required(),
     price: Joi.number().required(),
     description: Joi.string().min(5).max(50).required(),
-    brandId: Joi.objectId().required(),
+    brandId: Joi.objectId(),
     categoryId: Joi.objectId().required(),
+    typeId: Joi.objectId().required(),
+    genreId: Joi.objectId().required(),
     images: Joi.array()
       .items(Joi.object({ imageUrl: Joi.string().required() }))
       .max(4),
