@@ -20,7 +20,7 @@ router.post("/", [auth, admin], async (req, res) => {
   let category = new Category({ name: req.body.name, userId: req.user._id });
   category = await category.save();
 
-  res.status(201).send({ message: "New atrgory Created", category });
+  res.status(201).send({ message: "New catrgory Created", category });
 });
 
 // INFO: update category route
