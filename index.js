@@ -9,6 +9,8 @@ const helmet = require("helmet");
 const compression = require("compression");
 const xss = require("xss-clean");
 const brands = require("./routes/brands");
+const types = require("./routes/types");
+const genres = require("./routes/genres");
 const orders = require("./routes/orders");
 const users = require("./routes/users");
 const products = require("./routes/products");
@@ -44,6 +46,8 @@ app.get("/", (req, res) => {
 });
 app.use("/api/v1/users", users);
 app.use("/api/v1/brands", brands);
+app.use("/api/v1/types", types);
+app.use("/api/v1/genres", genres);
 app.use("/api/v1/orders", orders);
 app.use("/api/v1/products", products);
 app.use("/api/v1/categories", categories);
