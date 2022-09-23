@@ -59,7 +59,8 @@ router.get("/me", auth, async (req, res) => {
 
 // INFO: Create new product route
 router.post("/", [auth, upload.array("images", 4)], async (req, res) => {
-  if (!req.files) return res.status(422).send("No image provided.");
+  if (req.files.length === 0)
+    return res.status(422).send("No images provided.");
 
   // NOTE: Get the imageUrl from req.files
   let images = [];

@@ -20,12 +20,14 @@ const fileFilter = (req, file, cb) => {
   if (
     file.mimetype === "image/jpg" ||
     file.mimetype === "image/jpeg" ||
+    file.mimetype === "image/png" ||
     file.mimetype === "image/JPG" ||
+    file.mimetype === "image/PNG" ||
     file.mimetype === "image/JPEG"
   ) {
     cb(null, true);
   } else {
-    cb(null, false);
+    return cb((new Error("The images type are not allowed"), false));
   }
 };
 

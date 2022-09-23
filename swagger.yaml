@@ -1,0 +1,1603 @@
+openapi: 3.0.0
+info:
+  title: E-commerce Api
+  contact: {}
+  version: "1.0"
+servers:
+  - url: http://localhost:3000/api/v1
+    variables: {}
+  - url: https://api.stripe.com/v1
+    variables: {}
+paths:
+  /users/register:
+    post:
+      tags:
+        - Users
+      summary: signUp
+      operationId: signUp
+      parameters: []
+      requestBody:
+        description: ""
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/signUpRequest"
+                - example:
+                    name: mary
+                    email: mary@domain.com
+                    password: mary123
+            example:
+              name: mary
+              email: mary@domain.com
+              password: mary123
+        required: true
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      security: []
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+  /users/login:
+    post:
+      tags:
+        - Users
+      summary: login
+      operationId: login
+      parameters: []
+      requestBody:
+        description: ""
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/loginrequest"
+                - example:
+                    email: abubaker@admin.com
+                    password: abubaker123
+            example:
+              email: abubaker@admin.com
+              password: abubaker123
+        required: true
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      security: []
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+  /users:
+    get:
+      tags:
+        - Users
+      summary: Get All User
+      operationId: GetAllUser
+      parameters: []
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+  /users/{id}:
+    get:
+      tags:
+        - Users
+      summary: One User
+      operationId: OneUser
+      parameters:
+        - name: id
+          in: path
+          description: ""
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+    patch:
+      tags:
+        - Users
+      summary: Update User
+      operationId: UpdateUser
+      parameters:
+        - name: id
+          in: path
+          description: ""
+          required: true
+          style: simple
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            encoding: {}
+            schema:
+              required:
+                - profileImage
+              type: object
+              properties:
+                profileImage:
+                  type: string
+        required: false
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+    delete:
+      tags:
+        - Users
+      summary: Delete User
+      operationId: DeleteUser
+      parameters:
+        - name: id
+          in: path
+          description: ""
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+  /users/cart:
+    get:
+      tags:
+        - Users
+      summary: User Cart
+      operationId: UserCart
+      parameters: []
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+  /users/profile:
+    get:
+      tags:
+        - Users
+      summary: User Profile
+      operationId: UserProfile
+      parameters: []
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+  /users/resetpassword/{token}:
+    put:
+      tags:
+        - Users
+      summary: Reset Password
+      operationId: ResetPassword
+      parameters:
+        - name: token
+          in: path
+          description: ""
+          required: true
+          style: simple
+          schema:
+            type: string
+      requestBody:
+        description: ""
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/ResetPasswordRequest"
+                - example:
+                    password: "123456"
+            example:
+              password: "123456"
+        required: true
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      security: []
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+  /users/forgotpassword:
+    post:
+      tags:
+        - Users
+      summary: Forgot  password
+      operationId: Forgotpassword
+      parameters: []
+      requestBody:
+        description: ""
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/ForgotpasswordRequest"
+                - example:
+                    email: mona@domain.com
+            example:
+              email: mona@domain.com
+        required: true
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      security: []
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+  /users/addtocart:
+    post:
+      tags:
+        - Users
+      summary: Add To Cart
+      operationId: AddToCart
+      parameters: []
+      requestBody:
+        description: ""
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/AddToCartRequest"
+                - example:
+                    productId: 6304c1a727d822e2086928d9
+                    quantity: 2
+                    color: red
+                    size: "41"
+            example:
+              productId: 6304c1a727d822e2086928d9
+              quantity: 2
+              color: red
+              size: "41"
+        required: true
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+  /users/deletefromCart:
+    post:
+      tags:
+        - Users
+      summary: Delete From Cart
+      operationId: DeleteFromCart
+      parameters: []
+      requestBody:
+        description: ""
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/DeleteFromCartRequest"
+                - example:
+                    productId: 6307625fa0b7e3c126cc73f0
+            example:
+              productId: 6307625fa0b7e3c126cc73f0
+        required: true
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+  /brands:
+    get:
+      tags:
+        - Brands
+      summary: All Brands
+      operationId: AllBrands
+      parameters: []
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+    post:
+      tags:
+        - Brands
+      summary: Create Brand
+      operationId: CreateBrand
+      parameters: []
+      requestBody:
+        description: ""
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/CreateBrandRequest"
+                - example:
+                    name: Brand 1
+            example:
+              name: Brand 1
+        required: true
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+  /brands/{id}:
+    get:
+      tags:
+        - Brands
+      summary: One Brand
+      operationId: OneBrand
+      parameters:
+        - name: id
+          in: path
+          description: ""
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+    put:
+      tags:
+        - Brands
+      summary: Update Brand
+      operationId: UpdateBrand
+      parameters:
+        - name: id
+          in: path
+          description: ""
+          required: true
+          style: simple
+          schema:
+            type: string
+      requestBody:
+        description: ""
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/UpdateBrandRequest"
+                - example:
+                    name: H&M
+            example:
+              name: H&M
+        required: true
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+  /{id}:
+    delete:
+      tags:
+        - Brands
+      summary: Delete Brand
+      operationId: DeleteBrand
+      parameters:
+        - name: id
+          in: path
+          description: ""
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+  /categories:
+    get:
+      tags:
+        - Categories
+      summary: Get All Categories
+      operationId: GetAllCategories
+      parameters: []
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      security: []
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+    post:
+      tags:
+        - Categories
+      summary: Create Category
+      operationId: CreateCategory
+      parameters: []
+      requestBody:
+        description: ""
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/CreateCategoryRequest"
+                - example:
+                    name: Kids
+            example:
+              name: Kids
+        required: true
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+  /categories/{id}:
+    get:
+      tags:
+        - Categories
+      summary: One Category
+      operationId: OneCategory
+      parameters:
+        - name: id
+          in: path
+          description: ""
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+    put:
+      tags:
+        - Categories
+      summary: Update Category
+      operationId: UpdateCategory
+      parameters:
+        - name: id
+          in: path
+          description: ""
+          required: true
+          style: simple
+          schema:
+            type: string
+      requestBody:
+        description: ""
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/UpdateCategoryRequest"
+                - example:
+                    name: Women
+            example:
+              name: Women
+        required: true
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+    delete:
+      tags:
+        - Categories
+      summary: Delete Category
+      operationId: DeleteCategory
+      parameters:
+        - name: id
+          in: path
+          description: ""
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+  /products:
+    get:
+      tags:
+        - Products
+      summary: Get All Products
+      operationId: GetAllProducts
+      parameters: []
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      security: []
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+    post:
+      tags:
+        - Products
+      summary: Create  Product
+      operationId: CreateProduct
+      parameters: []
+      requestBody:
+        content:
+          multipart/form-data:
+            encoding: {}
+            schema:
+              required:
+                - title
+                - brandId
+                - categoryId
+                - genreId
+                - typeId
+                - numberInStock
+                - price
+                - description
+                - sizes[0][sizeItem]
+                - sizes[1][sizeItem]
+                - sizes[2][sizeItem]
+                - colors[0][colorItem]
+                - colors[1][colorItem]
+                - colors[2][colorItem]
+                - images
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: product tow
+                brandId:
+                  type: string
+                  example: 63023799758683a6a444b034
+                categoryId:
+                  type: string
+                  example: 63023db4850f8d413c0f1ba8
+                genreId:
+                  type: string
+                  example: 63023db4850f8d413c0f1ba8
+                typeId:
+                  type: string
+                  example: 63023db4850f8d413c0f1ba8
+                numberInStock:
+                  type: integer
+                  format: int32
+                  example: 25
+                price:
+                  type: integer
+                  format: int32
+                  example: 29
+                description:
+                  type: string
+                  example: "this is socend product "
+                sizes[0][sizeItem]:
+                  type: integer
+                  description: first size
+                  format: int32
+                  example: 42
+                sizes[1][sizeItem]:
+                  type: integer
+                  description: second size
+                  format: int32
+                  example: 40
+                sizes[2][sizeItem]:
+                  type: integer
+                  description: third size
+                  format: int32
+                  example: 41
+                colors[0][colorItem]:
+                  type: string
+                  description: first color
+                  example: yellow
+                colors[1][colorItem]:
+                  type: string
+                  description: second color
+                  example: red
+                colors[2][colorItem]:
+                  type: string
+                  description: third color
+                  example: gray
+                images:
+                  type: string
+                  format: binary
+        required: false
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+  /products/{id}:
+    get:
+      tags:
+        - Products
+      summary: One Product
+      operationId: OneProduct
+      parameters:
+        - name: id
+          in: path
+          description: ""
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+    patch:
+      tags:
+        - Products
+      summary: Update Product
+      operationId: UpdateProduct
+      parameters:
+        - name: id
+          in: path
+          description: ""
+          required: true
+          style: simple
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            encoding: {}
+            schema:
+              required:
+                - title
+                - Price
+                - Description
+                - brandId
+                - typeId
+                - categoryId
+                - genreId
+                - numberInStock
+                - sizes[0][sizeItem]
+                - sizes[1][sizeItem]
+                - sizes[2][sizeItem]
+                - colors[0][colorItem]
+                - colors[1][colorItem]
+                - colors[2][colorItem]
+                - images
+              type: object
+              properties:
+                title:
+                  type: string
+                Price:
+                  type: integer
+                  format: int32
+                Description:
+                  type: string
+                brandId:
+                  type: string
+                typeId:
+                  type: string
+                categoryId:
+                  type: string
+                genreId:
+                  type: string
+                numberInStock:
+                  type: integer
+                  format: int32
+                sizes[0][sizeItem]:
+                  type: integer
+                  description: first size
+                  format: int32
+                  example: 45
+                sizes[1][sizeItem]:
+                  type: integer
+                  description: second size
+                  format: int32
+                  example: 43
+                sizes[2][sizeItem]:
+                  type: integer
+                  description: third size
+                  format: int32
+                  example: 40
+                colors[0][colorItem]:
+                  type: integer
+                  description: first color
+                  format: int32
+                colors[1][colorItem]:
+                  type: integer
+                  description: second color
+                  format: int32
+                colors[2][colorItem]:
+                  type: integer
+                  description: third color
+                  format: int32
+                images:
+                  type: string
+                  description: one or more
+                  format: binary
+        required: false
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+    delete:
+      tags:
+        - Products
+      summary: Delete Product
+      operationId: DeleteProduct
+      parameters:
+        - name: id
+          in: path
+          description: ""
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+  /products/me:
+    get:
+      tags:
+        - Products
+      summary: Get User Products
+      operationId: GetUserProducts
+      parameters: []
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+  /orders:
+    get:
+      tags:
+        - Orders
+      summary: All Order Admin
+      operationId: AllOrderAdmin
+      parameters: []
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+    post:
+      tags:
+        - Orders
+      summary: Create Order
+      operationId: CreateOrder
+      parameters: []
+      requestBody:
+        description: ""
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/CreateOrderRequest"
+                - example:
+                    shippingAddress:
+                      fullName: mary adam
+                      phone: 0115-235-487
+                      address: my adress
+                      city: my city
+                      postalCode: "11112"
+                      country: my country
+                    paymentMethod: paypal
+                    shippingPrice: 10
+                    taxPrice: 1.56
+                    totalPrice: 81.56
+                    itemsPrice: 70
+            example:
+              shippingAddress:
+                fullName: mary adam
+                phone: 0115-235-487
+                address: my adress
+                city: my city
+                postalCode: "11112"
+                country: my country
+              paymentMethod: paypal
+              shippingPrice: 10
+              taxPrice: 1.56
+              totalPrice: 81.56
+              itemsPrice: 70
+        required: true
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+  /orders/me:
+    get:
+      tags:
+        - Orders
+      summary: User Orders
+      operationId: UserOrders
+      parameters: []
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+  /orders/{id}:
+    get:
+      tags:
+        - Orders
+      summary: Get One Order Admin
+      operationId: GetOneOrderAdmin
+      parameters:
+        - name: id
+          in: path
+          description: ""
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+    delete:
+      tags:
+        - Orders
+      summary: Delete Order
+      operationId: DeleteOrder
+      parameters:
+        - name: id
+          in: path
+          description: ""
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+  /orders/{id}/pay:
+    put:
+      tags:
+        - Orders
+      summary: Pay Order
+      operationId: PayOrder
+      parameters:
+        - name: id
+          in: path
+          description: ""
+          required: true
+          style: simple
+          schema:
+            type: string
+      requestBody:
+        description: ""
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/PayOrderRequest"
+                - example:
+                    source: tok_1Lc83GD9AuVai1xVmNSyOpYk
+                    amount: 10000
+                    currency: USD
+            example:
+              source: tok_1Lc83GD9AuVai1xVmNSyOpYk
+              amount: 10000
+              currency: USD
+        required: true
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+  /orders/{id}/deliver:
+    put:
+      tags:
+        - Orders
+      summary: Deliver Order
+      operationId: DeliverOrder
+      parameters:
+        - name: id
+          in: path
+          description: ""
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+  /types:
+    get:
+      tags:
+        - Types
+      summary: Get All types
+      operationId: GetAlltypes
+      parameters: []
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      security: []
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+    post:
+      tags:
+        - Types
+      summary: Create type
+      operationId: Createtype
+      parameters: []
+      requestBody:
+        description: ""
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/CreatetypeRequest"
+                - example:
+                    name: Makeup
+            example:
+              name: Makeup
+        required: true
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+  /types/{id}:
+    get:
+      tags:
+        - Types
+      summary: Get One Type
+      operationId: GetOneType
+      parameters:
+        - name: id
+          in: path
+          description: ""
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+    patch:
+      tags:
+        - Types
+      summary: Update Type
+      operationId: UpdateType
+      parameters:
+        - name: id
+          in: path
+          description: ""
+          required: true
+          style: simple
+          schema:
+            type: string
+      requestBody:
+        description: ""
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/UpdateTypeRequest"
+                - example:
+                    name: Makeup
+            example:
+              name: Makeup
+        required: true
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+    delete:
+      tags:
+        - Types
+      summary: Delete Type
+      operationId: DeleteType
+      parameters:
+        - name: id
+          in: path
+          description: ""
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+  /genres:
+    get:
+      tags:
+        - Genres
+      summary: Get All Genres
+      operationId: GetAllGenres
+      parameters: []
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      security: []
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+    post:
+      tags:
+        - Genres
+      summary: Create genre
+      operationId: Creategenre
+      parameters: []
+      requestBody:
+        description: ""
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/CreategenreRequest"
+                - example:
+                    name: High Heels
+            example:
+              name: High Heels
+        required: true
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+  /genres/{id}:
+    get:
+      tags:
+        - Genres
+      summary: Get One Genre
+      operationId: GetOneGenre
+      parameters:
+        - name: id
+          in: path
+          description: ""
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+    delete:
+      tags:
+        - Genres
+      summary: Delete Genre
+      operationId: DeleteGenre
+      parameters:
+        - name: id
+          in: path
+          description: ""
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: http://localhost:3000/api/v1
+          variables: {}
+  /tokens:
+    post:
+      tags:
+        - Stripe Token
+      summary: Add your Stripe Api Key as authorization header to get the token
+      operationId: GetStripeToken
+      parameters: []
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            encoding: {}
+            schema:
+              required:
+                - card[number]
+                - card[exp_month]
+                - card[exp_year]
+                - card[cvc]
+                - card[name]
+              type: object
+              properties:
+                card[number]:
+                  type: integer
+                  format: int64
+                  example: 4242424242424242
+                card[exp_month]:
+                  type: integer
+                  format: int32
+                  example: 4
+                card[exp_year]:
+                  type: integer
+                  format: int32
+                  example: 24
+                card[cvc]:
+                  type: integer
+                  format: int32
+                  example: 123
+                card[name]:
+                  type: string
+                  example: john doe
+        required: false
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      servers:
+        - url: https://api.stripe.com/v1
+          variables: {}
+components:
+  schemas:
+    signUpRequest:
+      title: signUpRequest
+      required:
+        - name
+        - email
+        - password
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+      example:
+        name: mary
+        email: mary@domain.com
+        password: mary123
+    loginrequest:
+      title: loginrequest
+      required:
+        - email
+        - password
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      example:
+        email: abubaker@admin.com
+        password: abubaker123
+    ResetPasswordRequest:
+      title: ResetPasswordRequest
+      required:
+        - password
+      type: object
+      properties:
+        password:
+          type: string
+      example:
+        password: "123456"
+    ForgotpasswordRequest:
+      title: ForgotpasswordRequest
+      required:
+        - email
+      type: object
+      properties:
+        email:
+          type: string
+      example:
+        email: mona@domain.com
+    AddToCartRequest:
+      title: AddToCartRequest
+      required:
+        - productId
+        - quantity
+        - color
+        - size
+      type: object
+      properties:
+        productId:
+          type: string
+        quantity:
+          type: integer
+          format: int32
+        color:
+          type: string
+        size:
+          type: string
+      example:
+        productId: 6304c1a727d822e2086928d9
+        quantity: 2
+        color: red
+        size: "41"
+    DeleteFromCartRequest:
+      title: DeleteFromCartRequest
+      required:
+        - productId
+      type: object
+      properties:
+        productId:
+          type: string
+      example:
+        productId: 6307625fa0b7e3c126cc73f0
+    CreateBrandRequest:
+      title: CreateBrandRequest
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+      example:
+        name: Brand 1
+    UpdateBrandRequest:
+      title: UpdateBrandRequest
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+      example:
+        name: H&M
+    CreateCategoryRequest:
+      title: CreateCategoryRequest
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+      example:
+        name: Kids
+    UpdateCategoryRequest:
+      title: UpdateCategoryRequest
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+      example:
+        name: Women
+    UpdateProductRequest:
+      title: UpdateProductRequest
+      required:
+        - title
+        - categoryId
+        - brandId
+        - images
+        - colors
+        - sizes
+        - description
+        - price
+        - numberInStock
+      type: object
+      properties:
+        title:
+          type: string
+        categoryId:
+          type: string
+        brandId:
+          type: string
+        images:
+          type: array
+          items:
+            $ref: "#/components/schemas/Image"
+          description: ""
+        colors:
+          type: array
+          items:
+            $ref: "#/components/schemas/Color"
+          description: ""
+        sizes:
+          type: array
+          items:
+            $ref: "#/components/schemas/Size"
+          description: ""
+        description:
+          type: string
+        price:
+          type: integer
+          format: int32
+        numberInStock:
+          type: integer
+          format: int32
+      example:
+        title: product one
+        categoryId: 63023db4850f8d413c0f1ba8
+        brandId: 63023799758683a6a444b034
+        images:
+          - imageUrl: images\2022-08-23T12-01-42.446Z%FB_IMG_5725413861943124557.jpg
+        colors:
+          - colorItem: red
+          - colorItem: blue
+        sizes:
+          - sizeItem: "41"
+        description: "this is first product "
+        price: 52
+        numberInStock: 100
+    Image:
+      title: Image
+      required:
+        - imageUrl
+      type: object
+      properties:
+        imageUrl:
+          type: string
+      example:
+        imageUrl: images\2022-08-23T12-01-42.446Z%FB_IMG_5725413861943124557.jpg
+    Color:
+      title: Color
+      required:
+        - colorItem
+      type: object
+      properties:
+        colorItem:
+          type: string
+      example:
+        colorItem: red
+    Size:
+      title: Size
+      required:
+        - sizeItem
+      type: object
+      properties:
+        sizeItem:
+          type: string
+      example:
+        sizeItem: "41"
+    CreateOrderRequest:
+      title: CreateOrderRequest
+      required:
+        - shippingAddress
+        - paymentMethod
+        - shippingPrice
+        - taxPrice
+        - totalPrice
+        - itemsPrice
+      type: object
+      properties:
+        shippingAddress:
+          allOf:
+            - $ref: "#/components/schemas/ShippingAddress"
+            - {}
+        paymentMethod:
+          type: string
+        shippingPrice:
+          type: integer
+          format: int32
+        taxPrice:
+          type: number
+        totalPrice:
+          type: number
+        itemsPrice:
+          type: integer
+          format: int32
+      example:
+        shippingAddress:
+          fullName: mary adam
+          phone: 0115-235-487
+          address: my adress
+          city: my city
+          postalCode: "11112"
+          country: my country
+        paymentMethod: paypal
+        shippingPrice: 10
+        taxPrice: 1.56
+        totalPrice: 81.56
+        itemsPrice: 70
+    ShippingAddress:
+      title: ShippingAddress
+      required:
+        - fullName
+        - phone
+        - address
+        - city
+        - postalCode
+        - country
+      type: object
+      properties:
+        fullName:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        city:
+          type: string
+        postalCode:
+          type: string
+        country:
+          type: string
+      example:
+        fullName: mary adam
+        phone: 0115-235-487
+        address: my adress
+        city: my city
+        postalCode: "11112"
+        country: my country
+    PayOrderRequest:
+      title: PayOrderRequest
+      required:
+        - source
+        - amount
+        - currency
+      type: object
+      properties:
+        source:
+          type: string
+        amount:
+          type: integer
+          format: int32
+        currency:
+          type: string
+      example:
+        source: tok_1Lc83GD9AuVai1xVmNSyOpYk
+        amount: 10000
+        currency: USD
+    CreatetypeRequest:
+      title: CreatetypeRequest
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+      example:
+        name: Makeup
+    UpdateTypeRequest:
+      title: UpdateTypeRequest
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+      example:
+        name: Makeup
+    CreategenreRequest:
+      title: CreategenreRequest
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+      example:
+        name: High Heels
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+security:
+  - bearer: []
+tags:
+  - name: Users
+    description: ""
+  - name: Brands
+    description: ""
+  - name: Categories
+    description: ""
+  - name: Products
+    description: ""
+  - name: Orders
+    description: ""
+  - name: Types
+    description: ""
+  - name: Genres
+    description: ""
+  - name: Stripe Token
+    description: ""

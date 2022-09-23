@@ -1,4 +1,4 @@
-// INFO: Shoes - Cloth - Jewelry - Makeup
+// INFO: Shoes - Clothe - Jewelry - Makeup
 const Joi = require("joi");
 const mongoose = require("mongoose");
 
