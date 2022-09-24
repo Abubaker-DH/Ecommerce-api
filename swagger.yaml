@@ -6,6 +6,8 @@ info:
 servers:
   - url: http://localhost:3000/api/v1
     variables: {}
+  - url: https://ecommerce-api-production-d621.up.railway.app/api/v1
+    variables: {}
   - url: https://api.stripe.com/v1
     variables: {}
 paths:
