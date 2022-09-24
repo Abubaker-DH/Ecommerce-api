@@ -3,6 +3,8 @@ const path = require("path");
 const express = require("express");
 const Joi = require("joi");
 const mongoose = require("mongoose");
+const swaggerUI = require("swagger-ui-express");
+const YAML = require("yamljs");
 const rateLimit = require("express-rate-limit");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -40,10 +42,15 @@ app.use(compression());
 // INFO: path for ststic file
 app.use("/images", express.static(path.join(__dirname, "images")));
 
-// INFO: All app routes
+// INFO: Swagger
+const swaggerDocument = YAML.load("./swagger.yaml");
+
 app.get("/", (req, res) => {
-  res.send('<h1"> Ecommerce Api </h1>');
+  res.send('<h1">E-Commerce Api </h1><a href="/api-docs">Documentation</a>');
 });
+
+// INFO: All app routes
+app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 app.use("/api/v1/users", users);
 app.use("/api/v1/brands", brands);
 app.use("/api/v1/types", types);
