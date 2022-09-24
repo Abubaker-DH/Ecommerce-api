@@ -56,7 +56,7 @@ router.delete("/:id", [auth, validateObjectId], async (req, res) => {
 });
 
 // INFO: get one brand route
-router.get("/:id", validateObjectId, async (req, res) => {
+router.get("/:id", [admin, validateObjectId], async (req, res) => {
   const brand = await Brand.findById(req.params.id).populate(
     "userId",
     "_id name email"

@@ -60,7 +60,7 @@ router.delete("/:id", [auth, admin, validateObjectId], async (req, res) => {
 });
 
 // INFO: get one category route
-router.get("/:id", validateObjectId, async (req, res) => {
+router.get("/:id", [admin, validateObjectId], async (req, res) => {
   const category = await Category.findById(req.params.id).populate(
     "userId",
     "_id name email"

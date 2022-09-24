@@ -6,15 +6,15 @@ info:
 servers:
   - url: https://ecommerce-api-production-d621.up.railway.app/api/v1
     variables: {}
-  - url: https://api.stripe.com/v1
-    variables: {}
   - url: http://localhost:3000/api/v1
+    variables: {}
+  - url: https://api.stripe.com/v1
     variables: {}
 paths:
   /users/register:
     post:
       tags:
-        - Users
+        - Auth
       summary: signUp
       operationId: signUp
       parameters: []
@@ -40,10 +40,11 @@ paths:
           headers: {}
       deprecated: false
       security: []
+
   /users/login:
     post:
       tags:
-        - Users
+        - Auth
       summary: login
       operationId: login
       parameters: []
@@ -67,6 +68,66 @@ paths:
           headers: {}
       deprecated: false
       security: []
+
+  /users/resetpassword/{token}:
+    put:
+      tags:
+        - Auth
+      summary: Reset Password
+      operationId: ResetPassword
+      parameters:
+        - name: token
+          in: path
+          description: ""
+          required: true
+          style: simple
+          schema:
+            type: string
+      requestBody:
+        description: ""
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/ResetPasswordRequest"
+                - example:
+                    password: "123456"
+            example:
+              password: "123456"
+        required: true
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      security: []
+
+  /users/forgotpassword:
+    post:
+      tags:
+        - Auth
+      summary: Forgot  password
+      operationId: Forgotpassword
+      parameters: []
+      requestBody:
+        description: ""
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/ForgotpasswordRequest"
+                - example:
+                    email: mona@domain.com
+            example:
+              email: mona@domain.com
+        required: true
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+      security: []
+
   /users:
     get:
       tags:
@@ -79,6 +140,7 @@ paths:
           description: ""
           headers: {}
       deprecated: false
+
   /users/{id}:
     get:
       tags:
@@ -98,6 +160,7 @@ paths:
           description: ""
           headers: {}
       deprecated: false
+
     patch:
       tags:
         - Users
@@ -128,6 +191,7 @@ paths:
           description: ""
           headers: {}
       deprecated: false
+
     delete:
       tags:
         - Users
@@ -172,65 +236,6 @@ paths:
           description: ""
           headers: {}
       deprecated: false
-
-  /users/resetpassword/{token}:
-    put:
-      tags:
-        - Users
-      summary: Reset Password
-      operationId: ResetPassword
-      parameters:
-        - name: token
-          in: path
-          description: ""
-          required: true
-          style: simple
-          schema:
-            type: string
-      requestBody:
-        description: ""
-        content:
-          application/json:
-            schema:
-              allOf:
-                - $ref: "#/components/schemas/ResetPasswordRequest"
-                - example:
-                    password: "123456"
-            example:
-              password: "123456"
-        required: true
-      responses:
-        "200":
-          description: ""
-          headers: {}
-      deprecated: false
-      security: []
-
-  /users/forgotpassword:
-    post:
-      tags:
-        - Users
-      summary: Forgot  password
-      operationId: Forgotpassword
-      parameters: []
-      requestBody:
-        description: ""
-        content:
-          application/json:
-            schema:
-              allOf:
-                - $ref: "#/components/schemas/ForgotpasswordRequest"
-                - example:
-                    email: mona@domain.com
-            example:
-              email: mona@domain.com
-        required: true
-      responses:
-        "200":
-          description: ""
-          headers: {}
-      deprecated: false
-      security: []
 
   /users/addtocart:
     post:
@@ -753,7 +758,6 @@ paths:
           description: ""
           headers: {}
       deprecated: false
-
   /orders:
     get:
       tags:
@@ -766,7 +770,6 @@ paths:
           description: ""
           headers: {}
       deprecated: false
-
     post:
       tags:
         - Orders
@@ -1095,7 +1098,7 @@ paths:
     post:
       tags:
         - Stripe Token
-      summary: Add your Stripe Api Key as authorization header to get the token
+      summary: Get Stripe Token
       operationId: GetStripeToken
       parameters: []
       requestBody:
@@ -1479,6 +1482,10 @@ components:
 security:
   - bearer: []
 tags:
+  - name: Misc
+    description: ""
+  - name: Auth
+    description: ""
   - name: Users
     description: ""
   - name: Brands
