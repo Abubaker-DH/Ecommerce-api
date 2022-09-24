@@ -1482,8 +1482,6 @@ components:
 security:
   - bearer: []
 tags:
-  - name: Misc
-    description: ""
   - name: Auth
     description: ""
   - name: Users
