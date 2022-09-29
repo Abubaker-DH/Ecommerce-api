@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const mongoose = require("mongoose");
 const express = require("express");
 const auth = require("../middleware/auth");
 const validateObjectId = require("../middleware/validateObjectId");
@@ -233,7 +234,7 @@ router.get("/:id", validateObjectId, async (req, res) => {
 });
 
 // INFO: Like product route
-router.post("/like", [auth, validateObjectId], async (req, res) => {
+router.post("/like", auth, async (req, res) => {
   const user = await User.findById(req.user._id);
 
   const product = await Product.findById(req.body.productId);
@@ -241,7 +242,9 @@ router.post("/like", [auth, validateObjectId], async (req, res) => {
     return res.status(404).send(" The product with given ID was not found.");
 
   // Check if the userId in the list of likeUser
-  const index = product.likes.findIndex((id) => id === req.user._id.toString());
+  const index = product.likes.findIndex((item) => {
+    return item.userId.toString() === req.user._id.toString();
+  });
 
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -250,14 +253,14 @@ router.post("/like", [auth, validateObjectId], async (req, res) => {
     // If the id doesn't exist
     if (index === -1) {
       // INFO: like the post
-      product.likes.push(req.userId);
+      product.likes.push({ userId: req.user._id });
       user.likeItems.push({ itemId: req.body.productId });
       product.save(session);
       user.save(session);
     } else {
       // INFO: disLike the post
       product.likes = product.likes.filter(
-        (id) => id !== req.user._id.toString()
+        (item) => item.userId.toString() !== req.user._id.toString()
       );
 
       user.likeItems = user.likeItems.filter(
