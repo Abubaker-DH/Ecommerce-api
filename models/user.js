@@ -54,6 +54,15 @@ const userSchema = new Schema(
         },
       },
     ],
+    likeItems: [
+      {
+        itemId: {
+          type: Schema.Types.ObjectId,
+          ref: "Product",
+          required: true,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );

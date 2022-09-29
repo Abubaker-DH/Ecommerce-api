@@ -60,6 +60,10 @@ const productSchema = new Schema(
       ref: "User",
       required: true,
     },
+    likes: {
+      type: [String],
+      default: [],
+    },
   },
   { timestamps: true }
 );

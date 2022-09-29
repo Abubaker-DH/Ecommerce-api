@@ -7,6 +7,7 @@ const { upload } = require("../middleware/upload");
 const { Product, validateProduct } = require("../models/product");
 const { Category } = require("../models/category");
 const { Brand } = require("../models/brand");
+const { User } = require("../models/user");
 const router = express.Router();
 
 // INFO: Get all products or search by title
@@ -229,6 +230,49 @@ router.get("/:id", validateObjectId, async (req, res) => {
     return res.status(404).send(" The product with given ID was not found.");
 
   res.send(product);
+});
+
+// INFO: Like product route
+router.post("/like", [auth, validateObjectId], async (req, res) => {
+  const user = await User.findById(req.user._id);
+
+  const product = await Product.findById(req.body.productId);
+  if (!product)
+    return res.status(404).send(" The product with given ID was not found.");
+
+  // Check if the userId in the list of likeUser
+  const index = product.likes.findIndex((id) => id === req.user._id.toString());
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    // If the id doesn't exist
+    if (index === -1) {
+      // INFO: like the post
+      product.likes.push(req.userId);
+      user.likeItems.push({ itemId: req.body.productId });
+      product.save(session);
+      user.save(session);
+    } else {
+      // INFO: disLike the post
+      product.likes = product.likes.filter(
+        (id) => id !== req.user._id.toString()
+      );
+
+      user.likeItems = user.likeItems.filter(
+        (item) => item.itemId.toString() !== req.body.productId.toString()
+      );
+      product.save(session);
+      user.save(session);
+    }
+    res.send(product);
+  } catch (error) {
+    console.log("Error occur while like or dislike a product", error);
+    await session.abortTransaction();
+  } finally {
+    await session.endSession();
+  }
 });
 
 // INFO: delete image from image Folder
