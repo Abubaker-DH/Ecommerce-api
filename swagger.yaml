@@ -6,8 +6,6 @@ info:
 servers:
   - url: https://ecommerce-api-production-d621.up.railway.app/api/v1
     variables: {}
-  - url: http://localhost:3000/api/v1
-    variables: {}
   - url: https://api.stripe.com/v1
     variables: {}
 paths:
@@ -753,6 +751,27 @@ paths:
       summary: Get User Products
       operationId: GetUserProducts
       parameters: []
+      responses:
+        "200":
+          description: ""
+          headers: {}
+      deprecated: false
+  /products/like:
+    post:
+      tags:
+        - Products
+      summary: Like / Dislike Product
+      operationId: Like/DislikeProduct
+      parameters: []
+      requestBody:
+        description: ""
+        content:
+          application/json:
+            schema:
+              type: string
+            example:
+              productId: 6329cafbd202f7b21db11ffc
+        required: true
       responses:
         "200":
           description: ""
