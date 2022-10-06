@@ -213,6 +213,9 @@ router.get("/:id", validateObjectId, async (req, res) => {
 
 // INFO: Like product route
 router.patch("/:id/like", auth, async (req, res) => {
+  if (req.user.role === "admin" || req.user.role === "super")
+    return res.status(403).send("Access denied.");
+
   const user = await User.findById(req.user._id);
 
   const product = await Product.findById(req.params.itemId);

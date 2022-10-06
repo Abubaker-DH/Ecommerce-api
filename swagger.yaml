@@ -719,18 +719,6 @@ paths:
           description: ""
           headers: {}
       deprecated: false
-  /products/me:
-    get:
-      tags:
-        - Products
-      summary: Get User Products
-      operationId: GetUserProducts
-      parameters: []
-      responses:
-        "200":
-          description: ""
-          headers: {}
-      deprecated: false
   /products/{id}/like:
     patch:
       tags:

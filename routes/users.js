@@ -249,6 +249,9 @@ router.post("/forgotpassword", async (req, res, next) => {
 
 // INFO: add to cart route
 router.post("/add-to-cart", auth, async (req, res) => {
+  if (req.user.role === "admin" || req.user.role === "super")
+    return res.status(403).send("Access denied.");
+
   const product = await Product.findById(req.body.productId);
   if (!product)
     return res.status(404).send("The product with given ID was not found.");
@@ -257,10 +260,6 @@ router.post("/add-to-cart", auth, async (req, res) => {
     return res
       .status(400)
       .send(`We just have ${product.numberInStock} items from this Product.`);
-
-  // INFO: the user can not add thier product to cart
-  if (req.user._id.toString() === product.userId.toString())
-    return res.status(405).send("Method not allowed");
 
   const user = await User.findById(req.user._id);
 
