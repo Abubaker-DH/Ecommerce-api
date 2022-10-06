@@ -102,9 +102,6 @@ router.post("/", auth, async (req, res) => {
 
 // INFO: Get Order by id
 router.get("/:id", [auth, validateObjectId], async (req, res) => {
-  if (req.user.role !== "admin" || req.user.role !== "super")
-    return res.status(401).send("Access denied.");
-
   const order = await Order.findById(req.params.id)
     .populate("userId", "_id name profileImage")
     .populate({
@@ -115,6 +112,12 @@ router.get("/:id", [auth, validateObjectId], async (req, res) => {
       populate: { path: "typeId", select: "name" },
     });
   if (!order) return res.status(404).send({ message: "Order Not Found" });
+
+  if (
+    req.user.role !== "admin" ||
+    req.user._id.toString() !== order.userId.toString()
+  )
+    return res.status(403).send("Access denied.");
 
   res.send(order);
 });
@@ -128,7 +131,7 @@ router.put("/:id/pay", [auth, validateObjectId], async (req, res) => {
   if (!order) return res.status(404).send({ message: "Order Not Found" });
 
   if (user._id.toString() !== order.userId.toString())
-    return res.status(401).send("Access denied.");
+    return res.status(403).send("Access denied.");
 
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -178,6 +181,9 @@ router.put("/:id/pay", [auth, validateObjectId], async (req, res) => {
 
 // INFO: Update the order after Delevered
 router.put("/:id/deliver", [auth, validateObjectId], async (req, res) => {
+  if (req.user.role !== "delivery")
+    return res.status(401).send("Access denied.");
+
   // get the order
   let order = await Order.findById(req.params.id);
 

@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const express = require("express");
 const auth = require("../middleware/auth");
 const validateObjectId = require("../middleware/validateObjectId");
+const admin = require("../middleware/admin");
 const { upload } = require("../middleware/upload");
 const { Product, validateProduct } = require("../models/product");
 const { Category } = require("../models/category");
@@ -44,23 +45,8 @@ router.get("/", async (req, res) => {
   res.send(products);
 });
 
-// INFO: Get all user products
-router.get("/me", auth, async (req, res) => {
-  const products = await Product.find({ userId: req.user._id })
-    .populate("brandId", "name")
-    .populate("categoryId", "name")
-    .populate("typeId", "name")
-    .populate("genreId", "name")
-    .populate("userId", "_id name profileImage")
-    .select("-__v");
-
-  if (!products) return res.status(400).send("Products was not found.");
-
-  res.send(products);
-});
-
 // INFO: Create new product route
-router.post("/", [auth, upload.array("images", 4)], async (req, res) => {
+router.post("/", [auth, admin, upload.array("images", 4)], async (req, res) => {
   if (req.files.length === 0)
     return res.status(422).send("No images provided.");
 
@@ -121,7 +107,7 @@ router.post("/", [auth, upload.array("images", 4)], async (req, res) => {
 // INFO: Update product route
 router.patch(
   "/:id",
-  [auth, validateObjectId, upload.array("images", 4)],
+  [auth, admin, validateObjectId, upload.array("images", 4)],
   async (req, res) => {
     let product = await Product.findById(req.params.id);
     if (!product) return res.status(400).send("Product was not found.");
@@ -171,12 +157,12 @@ router.patch(
     req.body.images = images;
 
     // NOTE: The owner or admin can update the product
-    if (
-      req.user._id.toString() !== product.userId.toString() ||
-      req.user.role !== "admin"
-    ) {
-      return res.status(405).send("Method not allowed.");
-    }
+    // if (
+    //   req.user._id.toString() !== product.userId.toString() ||
+    //   req.user.role !== "admin"
+    // ) {
+    //   return res.status(405).send("Method not allowed.");
+    // }
 
     product = await Product.findByIdAndUpdate(
       req.params.id,
@@ -201,32 +187,24 @@ router.patch(
 );
 
 // INFO: delete one product by id
-router.delete("/:id", [auth, validateObjectId], async (req, res) => {
+router.delete("/:id", [auth, admin, validateObjectId], async (req, res) => {
   const product = await Product.findById(req.params.id);
   if (!product)
     return res.status(404).send(" The product with given ID was not found.");
 
-  // NOTE: The Owner or admin can delete the product
-  if (
-    req.user._id.toString() === product.userId.toString() ||
-    req.user.role === "admin"
-  ) {
-    // NOTE: Delete all Images
-    for (j = 0; j < product.images.length; j++) {
-      clearImage(product.images[j].imageUrl);
-    }
-    await Product.findByIdAndRemove(req.params.id);
-    res.send({ product: product, message: "Product deleted." });
+  // NOTE: Delete all Images
+  for (j = 0; j < product.images.length; j++) {
+    clearImage(product.images[j].imageUrl);
   }
-  return res.status(405).send("Method not allowed.");
+  await Product.findByIdAndRemove(req.params.id);
+  res.send({ product: product, message: "Product deleted." });
 });
 
 // INFO: get one product route
 router.get("/:id", validateObjectId, async (req, res) => {
   const product = await Product.findById(req.params.id)
     .populate("categoryId", "name")
-    .populate("brandId", "name")
-    .populate("userId", "name _id profileImage");
+    .populate("brandId", "name");
   if (!product)
     return res.status(404).send(" The product with given ID was not found.");
 
@@ -234,10 +212,10 @@ router.get("/:id", validateObjectId, async (req, res) => {
 });
 
 // INFO: Like product route
-router.post("/like", auth, async (req, res) => {
+router.patch("/:id/like", auth, async (req, res) => {
   const user = await User.findById(req.user._id);
 
-  const product = await Product.findById(req.body.productId);
+  const product = await Product.findById(req.params.itemId);
   if (!product)
     return res.status(404).send(" The product with given ID was not found.");
 
@@ -254,7 +232,7 @@ router.post("/like", auth, async (req, res) => {
     if (index === -1) {
       // INFO: like the post
       product.likes.push({ userId: req.user._id });
-      user.likeItems.push({ itemId: req.body.productId });
+      user.likeItems.push({ itemId: req.params.id });
       product.save(session);
       user.save(session);
     } else {
@@ -264,7 +242,7 @@ router.post("/like", auth, async (req, res) => {
       );
 
       user.likeItems = user.likeItems.filter(
-        (item) => item.itemId.toString() !== req.body.productId.toString()
+        (item) => item.itemId.toString() !== req.params.id.toString()
       );
       product.save(session);
       user.save(session);

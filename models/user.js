@@ -28,7 +28,7 @@ const userSchema = new Schema(
     profileImage: { type: String },
     role: {
       type: String,
-      enum: ["user", "admin", "super"],
+      enum: ["user", "delivery", "admin", "super"],
       default: "user",
     },
     resetToken: String,
